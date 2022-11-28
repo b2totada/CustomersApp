@@ -1,6 +1,7 @@
 ﻿@page "/customer"
 @page "/customer/{id}"
 @inject ICustomerService CustomerService
+@inject IJSRuntime JSRuntime
 
 @if (Id == null)
 {
@@ -46,7 +47,10 @@ else
 	</div>
 	<br />
 	<button type="submit" class="btn btn-primary">@btnText</button>
-	<button type="button" class="btn btn-danger" @onclick="DeleteCustomer">Delete customer</button>
+	@if (Id != null)
+	{
+		<button type="button" class="btn btn-danger" @onclick="DeleteCustomer">Delete customer</button>
+	}
 </EditForm>
 
 @code {
@@ -56,6 +60,8 @@ else
 	string btnText = string.Empty;
 
 	Customer customer = new Customer { Category = new CustomerCategory() };
+
+	string message = "";
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -80,7 +86,36 @@ else
 	{
 		if (Id == null)
 		{
-			await CustomerService.CreateCustomer(customer);
+			try
+			{
+				customer.Id = customer.Id == string.Empty ? null : customer.Id;
+				customer.FirstName = customer.FirstName == string.Empty ? null : customer.FirstName;
+				customer.LastName = customer.LastName == string.Empty ? null : customer.LastName;
+				customer.Tel = customer.Tel == string.Empty ? null : customer.Tel;
+				customer.Address = customer.Address == string.Empty ? null : customer.Address;
+
+				if (customer.CategoryId == 1 && (String.IsNullOrWhiteSpace(customer.FirstName) || String.IsNullOrWhiteSpace(customer.LastName)))
+				{
+					throw new Exception("Lakossagi customer must have First Name and Last Name");
+				}
+				else if (customer.CategoryId == 2)
+				{
+					if (customer.FirstName == null)
+					{
+						customer.FirstName = "";
+					}
+					if (customer.LastName == null)
+					{
+						customer.LastName = "";
+					}
+				}
+
+				await CustomerService.CreateCustomer(customer);
+			}
+			catch (Exception ex)
+			{
+				await Alert(ex.Message);
+			}
 		}
 		else
 		{
@@ -91,5 +126,10 @@ else
 	async Task DeleteCustomer()
 	{
 		await CustomerService.DeleteCustomer(customer.Id);
+	}
+
+	private async Task Alert(string message)
+	{
+		await JSRuntime.InvokeAsync<object>("Alert", message);
 	}
 }

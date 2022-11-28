@@ -49,6 +49,10 @@ namespace CustomersApp.Client.Services.CustomerService
 
 		private async Task SetCustomers(HttpResponseMessage result)
 		{
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception($"{await result.Content.ReadAsStringAsync()}");
+			}
 			var response = await result.Content.ReadFromJsonAsync<List<Customer>>();
 			Customers = response;
 			_navigationManager.NavigateTo("customers");

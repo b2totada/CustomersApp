@@ -42,7 +42,11 @@ namespace CustomersApp.Server.Controllers
 		[HttpPost]
 		public async Task<ActionResult<List<Customer>>> CreateCustomer(Customer customer)
 		{
-            customer.Category = null;
+			if (await _context.Customers.FindAsync(customer.Id) != null)
+			{
+				return BadRequest("A customer with this ID already exists");
+			}
+			customer.Category = null;
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
