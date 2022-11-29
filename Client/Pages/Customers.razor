@@ -5,8 +5,7 @@
 
 <PageTitle>Customers</PageTitle>
 
-<h3>Customers</h3>
-
+@*Filters*@
 <div class="container">
 	<div class="row">
 		<div class="col" style="border: 1px solid gray; padding: 10px;">
@@ -26,18 +25,22 @@
 			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
 		</div>
 		<div class="col" style="border: 1px solid gray; padding: 10px;">
-			<label for="categories">Filter by categorie:</label>
-			<select name="categories" id="categories" @bind="filter" style="margin-bottom: 1vw;">
+			<label for="categories">Filter by category:</label>
+			<select name="categories" id="categories" @bind="cFilter" style="margin-bottom: 1vw;">
 				<option value="1">Lakossagi</option>
 				<option value="2">Ceges</option>
 			</select>
 			<br />
-			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter(filter))'>Filter</button>
+			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter(cFilter))'>Filter</button>
 			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
 		</div>
 	</div>
 </div>
 <br />
+
+<h3>Customers</h3>
+
+@*Grid for customer data*@
 <div class="container">
 	<div class="row">
 		<QuickGrid Items="CustomerService.Customers.AsQueryable()" ResizableColumns class="table">
@@ -47,6 +50,7 @@
 			<PropertyColumn Property="c => c.Tel" />
 			<PropertyColumn Property="c => c.Address" />
 			<PropertyColumn Property="c => c.Category.Name" Title="Category" />
+			@*Edit/Delete button*@
 			<TemplateColumn Title="Edit/Delete">
 				<div style="text-align: center;">
 					<button class="btn btn-primary" @onclick="(() => ShowCustomer(context))"><i class="oi oi-pencil"></i></button>
@@ -55,14 +59,16 @@
 		</QuickGrid>
 	</div>
 	<br />
+	@*Create new customer button*@
 	<div class="row">
 		<button class="btn btn-primary" @onclick="CreateNewCustomer" style="width: 20%;">Create new customer</button>
 	</div>
 </div>
 
 @code {
-	string filter = string.Empty;
 	#region Filters
+	string filter = string.Empty;
+	string cFilter = string.Empty;
 	private void Filter(string prop)
 	{
 		switch (prop)
@@ -74,13 +80,13 @@
 				CustomerService.Customers = CustomerService.Customers.Where(c => c.FirstName.ToLower().StartsWith(filter.ToLower())).ToList();
 				break;
 			case "lastname":
-				CustomerService.Customers = CustomerService.Customers.Where(c => c.LastName.StartsWith(filter)).ToList();
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.LastName.ToLower().StartsWith(filter.ToLower())).ToList();
 				break;
 			case "1":
-				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(filter)).ToList();
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(cFilter)).ToList();
 				break;
 			case "2":
-				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(filter)).ToList();
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(cFilter)).ToList();
 				break;
 		}
 

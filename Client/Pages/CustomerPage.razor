@@ -56,11 +56,8 @@ else
 @code {
 	[Parameter]
 	public string Id { get; set; }
-
 	string btnText = string.Empty;
-
 	Customer customer = new Customer { Category = new CustomerCategory() };
-
 	string message = "";
 
 	protected override async Task OnInitializedAsync()
@@ -88,12 +85,14 @@ else
 		{
 			try
 			{
+				//Handling of empty string problem
 				customer.Id = customer.Id == string.Empty ? null : customer.Id;
 				customer.FirstName = customer.FirstName == string.Empty ? null : customer.FirstName;
 				customer.LastName = customer.LastName == string.Empty ? null : customer.LastName;
 				customer.Tel = customer.Tel == string.Empty ? null : customer.Tel;
 				customer.Address = customer.Address == string.Empty ? null : customer.Address;
 
+				//Lakossagi customer must have First Name and Last Name but for Ceges it's optional
 				if (customer.CategoryId == 1 && (String.IsNullOrWhiteSpace(customer.FirstName) || String.IsNullOrWhiteSpace(customer.LastName)))
 				{
 					throw new Exception("Lakossagi customer must have First Name and Last Name");
@@ -128,6 +127,7 @@ else
 		await CustomerService.DeleteCustomer(customer.Id);
 	}
 
+	//using JSRuntime to alert the error message
 	private async Task Alert(string message)
 	{
 		await JSRuntime.InvokeAsync<object>("Alert", message);

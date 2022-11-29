@@ -8,6 +8,7 @@ namespace CustomersApp.Server.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
+		//injection of DataContext in ctor
 		private readonly DataContext _context;
 		public CustomerController(DataContext context)
         {

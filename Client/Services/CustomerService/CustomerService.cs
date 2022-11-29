@@ -9,6 +9,7 @@ namespace CustomersApp.Client.Services.CustomerService
 		public List<Customer> Customers { get; set; } = new List<Customer>();
 		public List<CustomerCategory> Categories { get; set; } = new List<CustomerCategory>();
 
+		//injection of HttpClient and NavigationManager in ctor
 		private readonly HttpClient _http;
 		private readonly NavigationManager _navigationManager;
 		public CustomerService(HttpClient http, NavigationManager navigationManager)
