@@ -7,23 +7,92 @@
 
 <h3>Customers</h3>
 
-<QuickGrid Items="CustomerService.Customers.AsQueryable()">
-	<PropertyColumn Property="c => c.Id"/>
-	<PropertyColumn Property="c => c.FirstName" Sortable="true"/>
-	<PropertyColumn Property="c => c.LastName" Sortable="true"/>
-	<PropertyColumn Property="c => c.Tel" />
-	<PropertyColumn Property="c => c.Address" />
-	<PropertyColumn Property="c => c.Category.Name" />
-	<TemplateColumn>
-		<div>
-			<button class="btn btn-primary" @onclick="(() => ShowCustomer(context))"><i class="oi oi-pencil"></i></button>
+<div class="container">
+	<div class="row">
+		<div class="col" style="border: 1px solid gray; padding: 10px;">
+			<input type="text" placeholder="Filter by Id" class="form-control mb-2 mr-sm-2" @bind="filter" />
+			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter("id"))'>Filter</button>
+			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
 		</div>
-	</TemplateColumn>
-</QuickGrid>
+		<div class="col" style="border: 1px solid gray; padding: 10px;">
+			<input type="text" placeholder="Filter by FirstName" class="form-control mb-2 mr-sm-2" @bind="filter" />
+			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter("firstname"))'>Filter</button>
+			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
+		</div>
+		<div class="vw-100"></div>
+		<div class="col" style="border: 1px solid gray; padding: 10px;">
+			<input type="text" placeholder="Filter by LastName" class="form-control mb-2 mr-sm-2" @bind="filter" />
+			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter("lastname"))'>Filter</button>
+			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
+		</div>
+		<div class="col" style="border: 1px solid gray; padding: 10px;">
+			<label for="categories">Filter by categorie:</label>
+			<select name="categories" id="categories" @bind="filter" style="margin-bottom: 1vw;">
+				<option value="1">Lakossagi</option>
+				<option value="2">Ceges</option>
+			</select>
+			<br />
+			<button class="btn btn-primary mb-2 mr-sm-2" @onclick='(() => Filter(filter))'>Filter</button>
+			<button class="btn btn-danger mb-2" @onclick="Clear">Clear</button>
+		</div>
+	</div>
+</div>
 <br />
-<button class="btn btn-primary" @onclick="CreateNewCustomer">Create new customer</button>
+<div class="container">
+	<div class="row">
+		<QuickGrid Items="CustomerService.Customers.AsQueryable()" ResizableColumns class="table">
+			<PropertyColumn Property="c => c.Id" />
+			<PropertyColumn Property="c => c.FirstName" Sortable="true" Title="First Name" />
+			<PropertyColumn Property="c => c.LastName" Sortable="true" Title="Last Name" />
+			<PropertyColumn Property="c => c.Tel" />
+			<PropertyColumn Property="c => c.Address" />
+			<PropertyColumn Property="c => c.Category.Name" Title="Category" />
+			<TemplateColumn Title="Edit/Delete">
+				<div style="text-align: center;">
+					<button class="btn btn-primary" @onclick="(() => ShowCustomer(context))"><i class="oi oi-pencil"></i></button>
+				</div>
+			</TemplateColumn>
+		</QuickGrid>
+	</div>
+	<br />
+	<div class="row">
+		<button class="btn btn-primary" @onclick="CreateNewCustomer" style="width: 20%;">Create new customer</button>
+	</div>
+</div>
 
 @code {
+	string filter = string.Empty;
+	#region Filters
+	private void Filter(string prop)
+	{
+		switch (prop)
+		{
+			case "id":
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.Id.StartsWith(filter)).ToList();
+				break;
+			case "firstname":
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.FirstName.ToLower().StartsWith(filter.ToLower())).ToList();
+				break;
+			case "lastname":
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.LastName.StartsWith(filter)).ToList();
+				break;
+			case "1":
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(filter)).ToList();
+				break;
+			case "2":
+				CustomerService.Customers = CustomerService.Customers.Where(c => c.Category.Id == Convert.ToInt32(filter)).ToList();
+				break;
+		}
+
+		filter = string.Empty;
+	}
+
+	private async Task Clear()
+	{
+		await CustomerService.GetCustomers();
+	}
+	#endregion
+
 	protected override async Task OnInitializedAsync()
 	{
 		await CustomerService.GetCustomers();
