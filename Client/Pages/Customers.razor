@@ -1,4 +1,5 @@
 ﻿@page "/customers"
+@using Microsoft.AspNetCore.Components.QuickGrid
 @inject ICustomerService CustomerService
 @inject NavigationManager NavigationManager
 
@@ -6,35 +7,20 @@
 
 <h3>Customers</h3>
 
-<table class="table">
-	<thead>
-		<tr>
-			<th>Id</th>
-			<th>First Name</th>
-			<th>Last Name</th>
-			<th>Tel</th>
-			<th>Address</th>
-			<th>Category</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var customer in CustomerService.Customers)
-		{
-			<tr>
-				<td>@customer.Id</td>
-				<td>@customer.FirstName</td>
-				<td>@customer.LastName</td>
-				<td>@customer.Tel</td>
-				<td>@customer.Address</td>
-				<td>@customer.Category.Name</td>
-				<td>
-					<button class="btn btn-primary" @onclick="(() => ShowCustomer(customer.Id))"><i class="oi oi-pencil"></i></button>
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+<QuickGrid Items="CustomerService.Customers.AsQueryable()">
+	<PropertyColumn Property="c => c.Id"/>
+	<PropertyColumn Property="c => c.FirstName" Sortable="true"/>
+	<PropertyColumn Property="c => c.LastName" Sortable="true"/>
+	<PropertyColumn Property="c => c.Tel" />
+	<PropertyColumn Property="c => c.Address" />
+	<PropertyColumn Property="c => c.Category.Name" />
+	<TemplateColumn>
+		<div>
+			<button class="btn btn-primary" @onclick="(() => ShowCustomer(context))"><i class="oi oi-pencil"></i></button>
+		</div>
+	</TemplateColumn>
+</QuickGrid>
+<br />
 <button class="btn btn-primary" @onclick="CreateNewCustomer">Create new customer</button>
 
 @code {
@@ -43,9 +29,9 @@
 		await CustomerService.GetCustomers();
 	}
 
-	void ShowCustomer(string id)
+	void ShowCustomer(Customer customer)
 	{
-		NavigationManager.NavigateTo($"customer/{id}");
+		NavigationManager.NavigateTo($"customer/{customer.Id}");
 	}
 
 	void CreateNewCustomer()
