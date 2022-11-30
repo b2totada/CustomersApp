@@ -85,30 +85,7 @@ else
 		{
 			try
 			{
-				//Handling of empty string problem
-				customer.Id = customer.Id == string.Empty ? null : customer.Id;
-				customer.FirstName = customer.FirstName == string.Empty ? null : customer.FirstName;
-				customer.LastName = customer.LastName == string.Empty ? null : customer.LastName;
-				customer.Tel = customer.Tel == string.Empty ? null : customer.Tel;
-				customer.Address = customer.Address == string.Empty ? null : customer.Address;
-
-				//Lakossagi customer must have First Name and Last Name but for Ceges it's optional
-				if (customer.CategoryId == 1 && (String.IsNullOrWhiteSpace(customer.FirstName) || String.IsNullOrWhiteSpace(customer.LastName)))
-				{
-					throw new Exception("Lakossagi customer must have First Name and Last Name");
-				}
-				else if (customer.CategoryId == 2)
-				{
-					if (customer.FirstName == null)
-					{
-						customer.FirstName = "";
-					}
-					if (customer.LastName == null)
-					{
-						customer.LastName = "";
-					}
-				}
-
+				ClientSideChecks(customer);
 				await CustomerService.CreateCustomer(customer);
 			}
 			catch (Exception ex)
@@ -118,7 +95,15 @@ else
 		}
 		else
 		{
-			await CustomerService.UpdateCustomer(customer);
+			try
+			{
+				ClientSideChecks(customer);
+				await CustomerService.UpdateCustomer(customer);
+			}
+			catch (Exception ex)
+			{
+				await Alert(ex.Message);
+			}
 		}
 	}
 
@@ -131,5 +116,32 @@ else
 	private async Task Alert(string message)
 	{
 		await JSRuntime.InvokeAsync<object>("Alert", message);
+	}
+
+	private void ClientSideChecks(Customer customer)
+	{
+		//Handling of empty string problem
+		customer.Id = customer.Id == string.Empty ? null : customer.Id;
+		customer.FirstName = customer.FirstName == string.Empty ? null : customer.FirstName;
+		customer.LastName = customer.LastName == string.Empty ? null : customer.LastName;
+		customer.Tel = customer.Tel == string.Empty ? null : customer.Tel;
+		customer.Address = customer.Address == string.Empty ? null : customer.Address;
+
+		//Lakossagi customer must have First Name and Last Name but for Ceges it's optional
+		if (customer.CategoryId == 1 && (String.IsNullOrWhiteSpace(customer.FirstName) || String.IsNullOrWhiteSpace(customer.LastName)))
+		{
+			throw new Exception("Lakossagi customer must have First Name and Last Name");
+		}
+		else if (customer.CategoryId == 2)
+		{
+			if (customer.FirstName == null)
+			{
+				customer.FirstName = "";
+			}
+			if (customer.LastName == null)
+			{
+				customer.LastName = "";
+			}
+		}
 	}
 }
